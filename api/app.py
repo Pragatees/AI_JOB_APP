@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])
 
 # Configure Gemini API key
-genai.configure(api_key="AIzaSyD7s27zUWqCJfg-rhGgcsqcSyYdJbZTh40")
+genai.configure(api_key="AIzaSyAcnQpddPINSFUGUalERP3hXVzb-9ZbtMs")
 
 generation_config = {
     "temperature": 0.9,

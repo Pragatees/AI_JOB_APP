@@ -37,7 +37,8 @@ const MySkills = () => {
     rejected: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar open by default
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); // Detect mobile view
 
   useEffect(() => {
     isMounted.current = true;
@@ -48,8 +49,19 @@ const MySkills = () => {
       fetchJobStats();
     }
 
+    // Handle responsive sidebar behavior
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setIsSidebarOpen(mobile ? false : true); // Close on mobile, open on desktop
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial check
+
     return () => {
       isMounted.current = false;
+      window.removeEventListener("resize", handleResize);
     };
   }, [username, token, history]);
 
@@ -279,97 +291,80 @@ const MySkills = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
     <div className={`w-screen h-screen flex ${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"} overflow-hidden`}>
-      {/* Hamburger Menu */}
+      {/* Sidebar Toggle Button */}
       <button
-        className={`fixed top-4 left-4 z-50 p-2 rounded-md ${darkMode ? "bg-gray-700 text-gray-100" : "bg-gray-200 text-gray-900"} md:hidden`}
         onClick={toggleSidebar}
-        aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-        aria-expanded={isSidebarOpen}
+        className={`fixed z-20 top-4 ${isSidebarOpen ? "left-72" : "left-0"} p-2 rounded-r-md ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-gray-100" : "bg-gray-200 hover:bg-gray-300 text-gray-900"} transition-all duration-300 shadow-md`}
       >
-        {isSidebarOpen ? "✕" : "☰"}
+        {isSidebarOpen ? "☰" : "☰"}
       </button>
-
-      {/* Overlay for Mobile */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={closeSidebar}
-          aria-hidden="true"
-        ></div>
-      )}
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 w-72 h-full ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-r p-8 flex flex-col transform transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:static md:translate-x-0 md:w-72 z-40`}
+        className={`h-full ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-r flex flex-col transition-all duration-300 overflow-hidden ${isSidebarOpen ? "w-72 p-8" : "w-0 p-0"}`}
       >
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex justify-center items-center text-white text-4xl font-bold mb-4">
-            {getProfileInitial()}
+        <div className={`${!isSidebarOpen && "hidden"} flex flex-col h-full`}>
+          <div className="flex flex-col items-center mb-6">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex justify-center items-center text-white text-4xl font-bold mb-4">
+              {getProfileInitial()}
+            </div>
+            <div className="text-xl font-bold text-center mb-4">{username || "User"}</div>
           </div>
-          <div className="text-xl font-bold text-center mb-4">{username || "User"}</div>
+          {/* Job Stats Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-4">Job Application Stats</h3>
+            {loadingStats ? (
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-green-50"}`}>
+                  <span className={`font-medium ${darkMode ? "text-green-300" : "text-green-700"}`}>Applied</span>
+                  <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-green-900 text-green-200" : "bg-green-100 text-green-800"}`}>
+                    {jobStats.applied}
+                  </span>
+                </div>
+                <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-amber-50"}`}>
+                  <span className={`font-medium ${darkMode ? "text-amber-300" : "text-amber-700"}`}>Interviewing</span>
+                  <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-amber-900 text-amber-200" : "bg-amber-100 text-amber-800"}`}>
+                    {jobStats.interviewing}
+                  </span>
+                </div>
+                <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-purple-50"}`}>
+                  <span className={`font-medium ${darkMode ? "text-purple-300" : "text-purple-700"}`}>Offered</span>
+                  <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-purple-900 text-purple-200" : "bg-purple-100 text-purple-800"}`}>
+                    {jobStats.offered}
+                  </span>
+                </div>
+                <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-red-50"}`}>
+                  <span className={`font-medium ${darkMode ? "text-red-300" : "text-red-700"}`}>Rejected</span>
+                  <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-red-900 text-red-200" : "bg-red-100 text-red-800"}`}>
+                    {jobStats.rejected}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <button
+                    onClick={() => history.push("/job")}
+                    className={`p-4 rounded-lg flex items-center justify-center gap-2 text-base font-medium cursor-pointer transition-all duration-200 w-full ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}
+                  >
+                    <span role="img" aria-label="home" className="text-lg">🏠</span>
+                    Home
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleLogout}
+            className={`p-4 rounded-lg flex items-center justify-center gap-2 text-base font-medium cursor-pointer transition-all duration-200 mt-auto ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}
+          >
+            <span role="img" aria-label="logout" className="text-lg">🚪</span>
+            Logout
+          </button>
         </div>
-        {/* Job Stats Section */}
-        <div className="mb-8">
-          <h3 className="text-lg font-bold mb-4">Job Application Stats</h3>
-          {loadingStats ? (
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-green-50"}`}>
-                <span className={`font-medium ${darkMode ? "text-green-300" : "text-green-700"}`}>Applied</span>
-                <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-green-900 text-green-200" : "bg-green-100 text-green-800"}`}>
-                  {jobStats.applied}
-                </span>
-              </div>
-              <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-amber-50"}`}>
-                <span className={`font-medium ${darkMode ? "text-amber-300" : "text-amber-700"}`}>Interviewing</span>
-                <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-amber-900 text-amber-200" : "bg-amber-100 text-amber-800"}`}>
-                  {jobStats.interviewing}
-                </span>
-              </div>
-              <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-purple-50"}`}>
-                <span className={`font-medium ${darkMode ? "text-purple-300" : "text-purple-700"}`}>Offered</span>
-                <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-purple-900 text-purple-200" : "bg-purple-100 text-purple-800"}`}>
-                  {jobStats.offered}
-                </span>
-              </div>
-              <div className={`flex justify-between items-center p-3 rounded-lg ${darkMode ? "bg-gray-700" : "bg-red-50"}`}>
-                <span className={`font-medium ${darkMode ? "text-red-300" : "text-red-700"}`}>Rejected</span>
-                <span className={`px-3 py-1 rounded-full font-bold ${darkMode ? "bg-red-900 text-red-200" : "bg-red-100 text-red-800"}`}>
-                  {jobStats.rejected}
-                </span>
-              </div>
-              <div className="mb-4">
-                <button
-                  onClick={() => history.push("/job")}
-                  className={`${darkMode ? "bg-gray-700 text-gray-100 border-gray-600" : "bg-gray-100 text-gray-900 border-gray-300"} border p-4 rounded-lg flex items-center justify-center gap-2 text-base font-medium cursor-pointer transition-all duration-200 w-full`}
-                >
-                  <span role="img" aria-label="home" className="text-lg">🏠</span>
-                  Home
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        <button
-          onClick={handleLogout}
-          className={`p-4 rounded-lg flex items-center justify-center gap-2 text-base font-medium cursor-pointer transition-all duration-200 mt-auto ${
-            darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"
-          }`}
-        >
-          <span role="img" aria-label="logout" className="text-lg">🚪</span>
-          Logout
-        </button>
       </div>
 
       {/* Main Content */}
@@ -377,9 +372,7 @@ const MySkills = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>My Skills</h2>
           <button
-            className={`rounded-full px-5 py-2.5 cursor-pointer flex items-center gap-2 text-sm transition-all duration-300 ${
-              darkMode ? "bg-gray-700 hover:bg-gray-600 text-gray-100" : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-            }`}
+            className={`rounded-full px-5 py-2.5 cursor-pointer flex items-center gap-2 text-sm transition-all duration-300 ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-gray-100" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
             onClick={() => setDarkMode(!darkMode)}
           >
             {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
@@ -582,9 +575,7 @@ const MySkills = () => {
                           handleAnalyzeSkills();
                           setShowReanalyzeButton(false);
                         }}
-                        className={`py-2 px-4 rounded-lg ${
-                          darkMode ? "bg-green-600 hover:bg-green-500" : "bg-green-500 hover:bg-green-600"
-                        } text-white font-medium`}
+                        className={`py-2 px-4 rounded-lg ${darkMode ? "bg-green-600 hover:bg-green-500" : "bg-green-500 hover:bg-green-600"} text-white font-medium`}
                         disabled={analysisLoading}
                       >
                         {analysisLoading ? "Analyzing..." : "Re-analyze Skills"}
@@ -600,9 +591,7 @@ const MySkills = () => {
                         skillData.skills.map((skill, idx) => (
                           <div
                             key={idx}
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                              darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-100 text-gray-800"
-                            }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-100 text-gray-800"}`}
                           >
                             {skill}
                             <button
@@ -658,9 +647,7 @@ const MySkills = () => {
                           {getImprovedSkills().map((skill, idx) => (
                             <span
                               key={idx}
-                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                darkMode ? "bg-blue-700 text-blue-200" : "bg-blue-100 text-blue-800"
-                              }`}
+                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${darkMode ? "bg-blue-700 text-blue-200" : "bg-blue-100 text-blue-800"}`}
                             >
                               {skill}
                             </span>
@@ -675,9 +662,7 @@ const MySkills = () => {
                           skillsAnalysis.skillsToImprove.map((skill, idx) => (
                             <span
                               key={idx}
-                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                darkMode ? "bg-yellow-700 text-yellow-200" : "bg-yellow-100 text-yellow-800"
-                              }`}
+                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${darkMode ? "bg-yellow-700 text-yellow-200" : "bg-yellow-100 text-yellow-800"}`}
                             >
                               {skill}
                             </span>
@@ -694,9 +679,7 @@ const MySkills = () => {
                           skillsAnalysis.additionalSkills.map((skill, idx) => (
                             <span
                               key={idx}
-                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                darkMode ? "bg-green-700 text-green-200" : "bg-green-100 text-green-800"
-                              }`}
+                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${darkMode ? "bg-green-700 text-green-200" : "bg-green-100 text-green-800"}`}
                             >
                               {skill}
                             </span>
