@@ -266,7 +266,7 @@ const JobManagement = () => {
 
       {/* Main Content */}
       <div className={`flex-1 p-8 overflow-auto transition-all duration-300`}>
-        SecondaryHeader
+        
         <div className="flex justify-between items-center mb-8">
           <h2 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
             Your Job Applications
