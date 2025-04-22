@@ -37,8 +37,8 @@ const MySkills = () => {
     rejected: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar open by default
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); // Detect mobile view
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     isMounted.current = true;
@@ -49,15 +49,14 @@ const MySkills = () => {
       fetchJobStats();
     }
 
-    // Handle responsive sidebar behavior
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setIsSidebarOpen(mobile ? false : true); // Close on mobile, open on desktop
+      setIsSidebarOpen(mobile ? false : true);
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
+    handleResize();
 
     return () => {
       isMounted.current = false;
@@ -73,17 +72,13 @@ const MySkills = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (isMounted.current) {
-        const newSkillData = {
+        setSkillData({
           skills: res.data.skills || [],
           interestedJobRoles: res.data.interestedJobRoles || [],
           preference: res.data.preference || "Remote",
           experience: res.data.experience || 0,
           location: res.data.location || "",
-        };
-        setSkillData(newSkillData);
-        if (newSkillData.skills.length > 0 && newSkillData.interestedJobRoles.length > 0) {
-          await handleAnalyzeSkills(newSkillData);
-        }
+        });
       }
     } catch (err) {
       if (isMounted.current) {
@@ -145,20 +140,21 @@ const MySkills = () => {
     setJobStats(stats);
   };
 
-  const handleAnalyzeSkills = async (data = skillData) => {
+  const handleAnalyzeSkills = async () => {
     setAnalysisLoading(true);
     setAnalysisError(null);
     try {
       const res = await axios.post(
         "http://localhost:2000/analyze-skills",
         {
-          skills: data.skills,
-          interestedJobRoles: data.interestedJobRoles,
+          skills: skillData.skills,
+          interestedJobRoles: skillData.interestedJobRoles,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (isMounted.current) {
         setSkillsAnalysis(res.data);
+        setShowReanalyzeButton(false);
       }
     } catch (err) {
       if (isMounted.current) {
@@ -203,9 +199,7 @@ const MySkills = () => {
         setNewExperience("");
         setNewLocation("");
         setShowAddSkillForm(false);
-        if (res.data.skills.length > 0 && res.data.interestedJobRoles.length > 0) {
-          await handleAnalyzeSkills(res.data);
-        }
+        setShowReanalyzeButton(true);
       }
     } catch (err) {
       console.error("Error adding skill:", err);
@@ -535,7 +529,7 @@ const MySkills = () => {
                       type="text"
                       value={skillData.location || ""}
                       onChange={(e) => setSkillData({ ...skillData, location: e.target.value })}
-                      className={`w-full p-2 rounded-lg ${darkMode ? "bg-gray-700 text-gray-100" : "bg-gray-100 text-gray-900"}`}
+                      className={`w-full p-2 rounded-lg ${darkMode ? "bg-gray-700 text-gray-100" : "bg-friendly-gray-100 text-gray-900"}`}
                     />
                   </div>
                   <div className="flex gap-4">
@@ -569,12 +563,16 @@ const MySkills = () => {
                     >
                       Edit
                     </button>
+                    <button
+                      onClick={handleAnalyzeSkills}
+                      className={`py-2 px-4 rounded-lg ${darkMode ? "bg-green-600 hover:bg-green-500" : "bg-green-500 hover:bg-green-600"} text-white font-medium`}
+                      disabled={analysisLoading || skillData.skills.length === 0 || skillData.interestedJobRoles.length === 0}
+                    >
+                      {analysisLoading ? "Analyzing..." : "Analyze Skillset"}
+                    </button>
                     {showReanalyzeButton && (
                       <button
-                        onClick={() => {
-                          handleAnalyzeSkills();
-                          setShowReanalyzeButton(false);
-                        }}
+                        onClick={handleAnalyzeSkills}
                         className={`py-2 px-4 rounded-lg ${darkMode ? "bg-green-600 hover:bg-green-500" : "bg-green-500 hover:bg-green-600"} text-white font-medium`}
                         disabled={analysisLoading}
                       >
