@@ -145,7 +145,7 @@ pip install -r requirements.txt
 
 ---
 
-And I utilize the AI tools Like ChatGpt , Claude and GROK AI
+Note: During the development of this project, I utilized various AI tools such as ChatGPT, Claude, and Grok AI to accelerate my Devolopment process
 
 ## 📧 Contact
 
