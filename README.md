@@ -145,6 +145,8 @@ pip install -r requirements.txt
 
 ---
 
+And I utilize the AI tools Like ChatGpt , Claude and GROK AI
+
 ## 📧 Contact
 
 For questions, support, or feedback:
