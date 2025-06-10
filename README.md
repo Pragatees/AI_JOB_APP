@@ -1,3 +1,4 @@
+# Demo Video -> https://drive.google.com/file/d/1ONMHQeLmNvL8zUGC4qhFAiuKZnf12hxJ/view?usp=sharing
 # Job Track AI – AI-Powered Job Application Tracker
 
 Job Track AI is a smart, full-stack job application management platform that empowers job seekers to organize, track, and optimize their job search journey. Powered by Google Gemini AI, the platform offers intelligent resume analysis, skill gap insights, interview preparation, and automated cover letter generation.
@@ -144,6 +145,8 @@ pip install -r requirements.txt
 
 ---
 
+Note: During the development of this project, I utilized various AI tools such as ChatGPT, Claude, and Grok AI to accelerate my Devolopment process
+
 ## 📧 Contact
 
 For questions, support, or feedback:
@@ -151,6 +154,4 @@ For questions, support, or feedback:
 
 ---
 
-## 📅 License
 
-This project is licensed under the **MIT License**. See the `LICENSE` file for more details.
