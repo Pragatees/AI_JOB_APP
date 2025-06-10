@@ -7,6 +7,7 @@ import Job from './components/pages/job';
 import Search from './components/pages/jobserach';
 import AI from './components/pages/aires';
 import Skills from './components/pages/myskills';
+import Prof from './components/pages/prof';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/search" component={Search} />
         <Route path="/res" component={AI} />
         <Route path="/ski" component={Skills} />
+        <Route path='/prof' component={Prof}/>
       </Switch>
     </Router>
   );
